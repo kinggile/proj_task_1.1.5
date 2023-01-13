@@ -5,12 +5,13 @@ import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
-    Transaction transaction = null;
+    private Transaction transaction = null;
 
     public UserDaoHibernateImpl() {
 
@@ -81,19 +82,14 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
+        TypedQuery<User> typedQuery;
         List<User> userList = null;
         try (Session session = Util.getSessionFactory().openSession()) {
-            CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-            CriteriaQuery<User> criteria = criteriaBuilder.createQuery(User.class);
-            criteria.from(User.class);
-            userList = session.createQuery(criteria).getResultList();
+            typedQuery = session.createQuery("from User");
+            userList = typedQuery.getResultList();
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
-
         return userList;
     }
 
